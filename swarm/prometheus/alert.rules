@@ -1,0 +1,38 @@
+groups:
+- name: default
+  rules:
+  - alert: service_down
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: 高
+    annotations:
+      name: 主机状态
+      description: "当前主机失联已超过5分钟"
+
+  - alert: cpu_usage
+    expr: 100 - (avg by (instance, address, node) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 2m
+    labels:
+      severity: 高
+    annotations:
+      name: CPU 使用率
+      description: "CPU 使用率超过80%, 当前: {{ $value | printf \"%.2f\" }}%"
+
+  - alert: memory_usage
+    expr: 100 * (1 - ((avg_over_time(node_memory_MemFree_bytes[10m]) + avg_over_time(node_memory_Cached_bytes[10m]) + avg_over_time(node_memory_Buffers_bytes[10m])) / avg_over_time(node_memory_MemTotal_bytes[10m]))) > 80
+    for: 2m
+    labels:
+      severity: 高
+    annotations:
+      name: 内存使用率
+      description: "内存使用率超过80%, 当前: {{ $value | printf \"%.2f\" }}%"
+
+  - alert: storage_usage
+    expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{mountpoint="/",fstype!="rootfs"}) > 80
+    for: 2m
+    labels:
+      severity: 高
+    annotations:
+      name: 磁盘使用率
+      description: "磁盘使用率超过80%, 当前: {{ $value | printf \"%.2f\" }}%"

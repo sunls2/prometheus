@@ -1,0 +1,22 @@
+{{ range $i, $alert := .Alerts }}
+{{ $mark := $alert.Labels.mark }}
+{{ $node := $alert.Labels.node }}
+{{ if $node }}{{ $node = printf "-%s" $node }}{{ end }}
+{{ $node = or $node "" }}
+{{ $mark = printf "[%s%s]" $mark $node }}
+{{ if eq .Status "firing" }}
+# <font color="warning">{{ $mark }} {{ $alert.Annotations.name }}告警</font>
+> 级别：<font color="warning">{{ $alert.Labels.severity }}</font>
+> 主机：{{ $alert.Labels.instance }}
+> 地址：{{ $alert.Labels.address }}
+> 详情：<font color="warning">{{ $alert.Annotations.description }}</font>
+> 时间：{{ timeFormat "2006-01-02 15:04:05" ($alert.StartsAt) }}
+> 图表：[点击查看]({{ $alert.GeneratorURL }})
+{{ else if eq .Status "resolved"}}
+# <font color="info">{{ $mark }} {{ $alert.Annotations.name }}告警恢复</font>
+> 主机：{{ $alert.Labels.instance }}
+> 地址：{{ $alert.Labels.address }}
+> 详情：<font color="info">{{ $alert.Annotations.name }}告警已恢复</font>
+> 时间：{{ timeFormat "2006-01-02 15:04:05" ($alert.EndsAt) }}
+{{ end }}
+{{ end }}

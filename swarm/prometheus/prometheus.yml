@@ -1,0 +1,35 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    mark: "VPS"
+
+rule_files:
+  - 'alert.rules'
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "alertmanager:9093"
+
+scrape_configs:
+  - job_name: 'node-exporter'
+    dockerswarm_sd_configs:
+      - host: unix:///var/run/docker.sock
+        role: nodes
+    relabel_configs:
+      - source_labels: [__meta_dockerswarm_node_address]
+        target_label: __address__
+        replacement: $1:9100
+      - source_labels: [__meta_dockerswarm_node_manager_leader]
+        regex: true
+        target_label: __address__
+        replacement: node-exporter:9100
+      - source_labels: [__meta_dockerswarm_node_hostname]
+        target_label: instance
+      - source_labels: [__meta_dockerswarm_node_address]
+        target_label: address
+      - source_labels: [__meta_dockerswarm_node_label_mark]
+        target_label: node

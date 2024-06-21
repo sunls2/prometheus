@@ -1,0 +1,9 @@
+route:
+  receiver: 'wecom'
+  repeat_interval: 1h
+  group_interval: 1m
+
+receivers:
+  - name: 'wecom'
+    webhook_configs:
+    - url: http://wecomhook:6666/webhook
